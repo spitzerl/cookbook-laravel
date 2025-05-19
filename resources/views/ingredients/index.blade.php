@@ -5,9 +5,11 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Ingrédients</h1>
+        @auth
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addIngredientModal">
             <i class="bi bi-plus-circle"></i> Nouvel Ingrédient
         </button>
+        @endauth
     </div>
 
     @if($ingredients->isEmpty())
@@ -37,22 +39,26 @@
                                     <td>{{ $ingredient->recipes->count() }} recettes</td>
                                     <td>
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-sm btn-outline-primary edit-ingredient" 
-                                                    data-id="{{ $ingredient->id }}"
-                                                    data-name="{{ $ingredient->name }}"
-                                                    data-description="{{ $ingredient->description }}"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#editIngredientModal">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            
-                                            <form action="{{ route('ingredients.destroy', $ingredient) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet ingrédient ? Il sera retiré de toutes les recettes.')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i>
+                                            @auth
+                                                @if(auth()->user()->isAdmin())
+                                                <button class="btn btn-sm btn-outline-primary edit-ingredient" 
+                                                        data-id="{{ $ingredient->id }}"
+                                                        data-name="{{ $ingredient->name }}"
+                                                        data-description="{{ $ingredient->description }}"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#editIngredientModal">
+                                                    <i class="bi bi-pencil"></i>
                                                 </button>
-                                            </form>
+                                                
+                                                <form action="{{ route('ingredients.destroy', $ingredient) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet ingrédient ? Il sera retiré de toutes les recettes.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                                @endif
+                                            @endauth
                                         </div>
                                     </td>
                                 </tr>

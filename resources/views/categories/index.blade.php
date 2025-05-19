@@ -5,9 +5,11 @@
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Catégories</h1>
+        @auth
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
             <i class="bi bi-plus-circle"></i> Nouvelle Catégorie
         </button>
+        @endauth
     </div>
 
     @if($categories->isEmpty())
@@ -37,22 +39,26 @@
                                     <td>{{ $category->recipes->count() }}</td>
                                     <td>
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-sm btn-outline-primary edit-category" 
-                                                    data-id="{{ $category->id }}"
-                                                    data-name="{{ $category->name }}"
-                                                    data-description="{{ $category->description }}"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#editCategoryModal">
-                                                <i class="bi bi-pencil"></i>
-                                            </button>
-                                            
-                                            <form action="{{ route('categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ? Toutes les recettes associées seront également supprimées.')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                    <i class="bi bi-trash"></i>
+                                            @auth
+                                                @if(auth()->user()->isAdmin())
+                                                <button class="btn btn-sm btn-outline-primary edit-category" 
+                                                        data-id="{{ $category->id }}"
+                                                        data-name="{{ $category->name }}"
+                                                        data-description="{{ $category->description }}"
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#editCategoryModal">
+                                                    <i class="bi bi-pencil"></i>
                                                 </button>
-                                            </form>
+                                                
+                                                <form action="{{ route('categories.destroy', $category) }}" method="POST" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ? Toutes les recettes associées seront également supprimées.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                                @endif
+                                            @endauth
                                         </div>
                                     </td>
                                 </tr>
