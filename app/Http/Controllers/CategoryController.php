@@ -4,9 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
+    /**
+     * Constructor to set middleware for specific actions
+     */
+    public function __construct()
+    {
+        // Les routes sont déjà protégées par les middlewares dans routes/web.php
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -29,6 +38,12 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::user()) {
+            return redirect()->route('categories.index')
+                ->with('error', 'Vous devez être connecté pour créer une catégorie.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -61,6 +76,12 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        // Vérifier si l'utilisateur est admin
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('categories.index')
+                ->with('error', 'Seuls les administrateurs peuvent modifier les catégories.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -77,6 +98,12 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        // Vérifier si l'utilisateur est admin
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('categories.index')
+                ->with('error', 'Seuls les administrateurs peuvent supprimer les catégories.');
+        }
+        
         $category->delete();
         
         return redirect()->route('categories.index')

@@ -1,6 +1,23 @@
-# Cookbook - Application de Gestion de Recettes
+# SIO Cookbook - Projet étudiant BTS SIO SLAM
 
-Une application de gestion de recettes de cuisine développée avec Laravel et SQLite.
+![Badge: Projet d'entraînement](https://img.shields.io/badge/Type-Projet%20d'entraînement-orange)
+![Badge: Formation](https://img.shields.io/badge/Formation-BTS%20SIO%20SLAM-blue)
+![Badge: Technologies](https://img.shields.io/badge/Technologies-Laravel%20|%20Bootstrap-green)
+
+Cette application de gestion de recettes de cuisine est développée dans le cadre d'une formation au **BTS SIO option SLAM** (Services Informatiques aux Organisations - Solutions Logicielles et Applications Métiers) à la CCI de Nîmes.
+
+[![GitHub](https://img.shields.io/badge/GitHub-Code%20source-black?style=flat&logo=github)](https://github.com/spitzerl/cookbook-laravel)
+
+## Contexte du projet
+
+Ce projet pédagogique a pour objectif l'apprentissage et la mise en pratique des concepts suivants :
+- Développement d'une application web complète avec Laravel
+- Mise en place d'une architecture MVC
+- Gestion de l'authentification et des autorisations
+- Manipulation de base de données avec Eloquent ORM
+- Création d'interfaces utilisateur avec Bootstrap
+
+**Note importante** : Cette application est développée à des fins éducatives et ne doit pas être utilisée en production.
 
 ## Fonctionnalités
 
@@ -24,8 +41,8 @@ Une application de gestion de recettes de cuisine développée avec Laravel et S
 ### 1. Cloner le dépôt
 
 ```bash
-git clone https://github.com/votre-utilisateur/cookbook.git
-cd cookbook
+git clone https://github.com/spitzerl/cookbook-laravel.git
+cd cookbook-laravel
 ```
 
 ### 2. Installer les dépendances
@@ -128,8 +145,15 @@ Le projet utilise les tables suivantes:
 
 ## Licence
 
-Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
+Ce projet est développé à des fins éducatives dans le cadre d'une formation BTS SIO SLAM. Tous droits réservés.
 
-## Contact
+## À propos de l'auteur
 
-Pour toute question ou suggestion concernant ce projet, n'hésitez pas à nous contacter.
+Ce projet a été réalisé par un étudiant en BTS SIO SLAM à la CCI de Nîmes dans le cadre de son apprentissage du framework Laravel et des bonnes pratiques de développement web.
+
+## Remerciements
+
+- CCI de Nîmes et l'équipe pédagogique du BTS SIO
+- Documentation Laravel et sa communauté
+- Bootstrap pour les composants d'interface
+- GitHub pour l'hébergement du code source

@@ -7,16 +7,56 @@ use App\Models\Category;
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class RecipeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $recipes = Recipe::with('category')->get();
-        return view('recipes.index', compact('recipes'));
+        $query = Recipe::query()
+            ->with(['category', 'user'])
+            ->select(['id', 'title', 'description', 'image_path', 'category_id', 'user_id', 'created_at']);
+
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('title', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Tri
+        $sort = $request->input('sort', 'newest');
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest();
+                break;
+            case 'alphabetical':
+                $query->orderBy('title');
+                break;
+            case 'most_liked':
+                $query->withCount('likedBy')
+                      ->orderByDesc('liked_by_count');
+                break;
+            case 'newest':
+            default:
+                $query->latest();
+                break;
+        }
+
+        $recipes = $query->paginate(12)->withQueryString();
+        $categories = Category::select(['id', 'name'])->get();
+        $sortOptions = [
+            'newest' => 'Plus récentes',
+            'oldest' => 'Plus anciennes',
+            'alphabetical' => 'Ordre alphabétique',
+            'most_liked' => 'Plus likées'
+        ];
+
+        return view('recipes.index', compact('recipes', 'categories', 'sortOptions'));
     }
 
     /**
@@ -51,6 +91,9 @@ class RecipeController extends Controller
         ]);
 
         $recipe = new Recipe($request->except('image', 'ingredients'));
+        
+        // Associer la recette à l'utilisateur connecté
+        $recipe->user_id = auth()->id();
         
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('recipe-images', 'public');
@@ -87,6 +130,12 @@ class RecipeController extends Controller
      */
     public function edit(Recipe $recipe)
     {
+        // Vérifier si l'utilisateur est le propriétaire de la recette ou un administrateur
+        if (auth()->id() !== $recipe->user_id && !auth()->user()->is_admin) {
+            return redirect()->route('recipes.show', $recipe)
+                ->with('error', 'Vous n\'êtes pas autorisé à modifier cette recette.');
+        }
+        
         $recipe->load('ingredients');
         $categories = Category::all();
         $ingredients = Ingredient::all();
@@ -98,6 +147,12 @@ class RecipeController extends Controller
      */
     public function update(Request $request, Recipe $recipe)
     {
+        // Vérifier si l'utilisateur est le propriétaire de la recette ou un administrateur
+        if (auth()->id() !== $recipe->user_id && !auth()->user()->is_admin) {
+            return redirect()->route('recipes.show', $recipe)
+                ->with('error', 'Vous n\'êtes pas autorisé à modifier cette recette.');
+        }
+        
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'required|string',
@@ -146,6 +201,12 @@ class RecipeController extends Controller
      */
     public function destroy(Recipe $recipe)
     {
+        // Vérifier si l'utilisateur est le propriétaire de la recette ou un administrateur
+        if (auth()->id() !== $recipe->user_id && !auth()->user()->is_admin) {
+            return redirect()->route('recipes.show', $recipe)
+                ->with('error', 'Vous n\'êtes pas autorisé à supprimer cette recette.');
+        }
+        
         // Delete the recipe image if exists
         if ($recipe->image_path) {
             Storage::disk('public')->delete($recipe->image_path);

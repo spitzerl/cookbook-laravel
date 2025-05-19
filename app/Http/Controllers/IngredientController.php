@@ -4,9 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Ingredient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class IngredientController extends Controller
 {
+    /**
+     * Constructor to set middleware for specific actions
+     */
+    public function __construct()
+    {
+        // Les routes sont déjà protégées par les middlewares dans routes/web.php
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -29,6 +38,12 @@ class IngredientController extends Controller
      */
     public function store(Request $request)
     {
+        // Vérifier si l'utilisateur est connecté
+        if (!Auth::user()) {
+            return redirect()->route('ingredients.index')
+                ->with('error', 'Vous devez être connecté pour créer un ingrédient.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -61,6 +76,12 @@ class IngredientController extends Controller
      */
     public function update(Request $request, Ingredient $ingredient)
     {
+        // Vérifier si l'utilisateur est admin
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('ingredients.index')
+                ->with('error', 'Seuls les administrateurs peuvent modifier les ingrédients.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -77,6 +98,12 @@ class IngredientController extends Controller
      */
     public function destroy(Ingredient $ingredient)
     {
+        // Vérifier si l'utilisateur est admin
+        if (!Auth::user() || !Auth::user()->isAdmin()) {
+            return redirect()->route('ingredients.index')
+                ->with('error', 'Seuls les administrateurs peuvent supprimer les ingrédients.');
+        }
+        
         $ingredient->delete();
         
         return redirect()->route('ingredients.index')
