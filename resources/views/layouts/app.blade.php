@@ -311,13 +311,6 @@
     </style>
 </head>
 <body>
-    <!-- Bandeau d'information projet -->
-    <div id="info-banner" class="bg-warning text-dark py-2 text-center" style="font-weight: 500; position: relative;">
-        <div class="container">
-            <i class="bi bi-info-circle-fill me-2"></i> Ceci est un projet d'entraînement développé dans le cadre du BTS SIO SLAM - CCI de Nîmes
-            <button type="button" class="btn-close btn-sm position-absolute" style="right: 10px; top: 50%; transform: translateY(-50%);" aria-label="Fermer" onclick="document.getElementById('info-banner').style.display='none';"></button>
-        </div>
-    </div>
     
     <nav class="navbar navbar-expand-lg navbar-dark mb-0">
         <div class="container">
@@ -461,4 +454,4 @@
     <!-- Custom JS -->
     @yield('scripts')
 </body>
-</html> 
+</html>
