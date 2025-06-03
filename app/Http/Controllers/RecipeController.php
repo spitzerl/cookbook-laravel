@@ -41,6 +41,14 @@ class RecipeController extends Controller
                 $query->withCount('likedBy')
                       ->orderByDesc('liked_by_count');
                 break;
+            case 'highest_rated':
+                $query->withAvg('ratings', 'rating')
+                      ->orderByDesc('ratings_avg_rating');
+                break;
+            case 'lowest_rated':
+                $query->withAvg('ratings', 'rating')
+                      ->orderBy('ratings_avg_rating');
+                break;
             case 'newest':
             default:
                 $query->latest();
@@ -53,7 +61,9 @@ class RecipeController extends Controller
             'newest' => 'Plus récentes',
             'oldest' => 'Plus anciennes',
             'alphabetical' => 'Ordre alphabétique',
-            'most_liked' => 'Plus likées'
+            'most_liked' => 'Plus likées',
+            'highest_rated' => 'Mieux notées',
+            'lowest_rated' => 'Moins bien notées'
         ];
 
         return view('recipes.index', compact('recipes', 'categories', 'sortOptions'));

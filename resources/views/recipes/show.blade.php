@@ -53,6 +53,34 @@ use Illuminate\Support\Facades\Auth;
                             </span>
                             <span class="badge bg-success"><i class="bi bi-people-fill me-1"></i>{{ $recipe->servings }} portions</span>
                         </div>
+                        
+                        <!-- Affichage de la note moyenne -->
+                        <div class="mt-3">
+                            <h6>Note moyenne:</h6>
+                            <div class="rating-display">
+                                @php
+                                    $avgRating = $recipe->averageRating();
+                                    $fullStars = floor($avgRating);
+                                    $halfStar = $avgRating - $fullStars > 0.4 ? 1 : 0;
+                                    $emptyStars = 5 - $fullStars - $halfStar;
+                                @endphp
+                                
+                                @for($i = 0; $i < $fullStars; $i++)
+                                    <i class="bi bi-star-fill text-warning"></i>
+                                @endfor
+                                
+                                @if($halfStar)
+                                    <i class="bi bi-star-half text-warning"></i>
+                                @endif
+                                
+                                @for($i = 0; $i < $emptyStars; $i++)
+                                    <i class="bi bi-star text-warning"></i>
+                                @endfor
+                                
+                                <span class="ms-2">{{ number_format($avgRating, 1) }}/5 
+                                ({{ $recipe->ratings()->count() }} avis)</span>
+                            </div>
+                        </div>
                     </div>
                     
                     <h5 class="border-bottom pb-2 mb-3">Description</h5>
@@ -102,7 +130,7 @@ use Illuminate\Support\Facades\Auth;
                 <h4 class="d-flex align-items-center mb-3">
                     <i class="bi bi-list-check me-2 text-primary"></i>Instructions
                 </h4>
-                <div class="card border-0 shadow-sm">
+                <div class="card border-0 shadow-sm mb-4">
                     <div class="card-body">
                         <div class="instructions-container">
                             @php
@@ -124,6 +152,87 @@ use Illuminate\Support\Facades\Auth;
                                 @endif
                             @endforeach
                         </div>
+                    </div>
+                </div>
+                
+                <!-- Formulaire de notation -->
+                <h4 class="d-flex align-items-center mb-3">
+                    <i class="bi bi-star me-2 text-primary"></i>Noter cette recette
+                </h4>
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body">
+                        @auth
+                            @php
+                                $userRating = $recipe->ratings()->where('user_id', Auth::id())->first();
+                            @endphp
+                            
+                            <form action="{{ route('recipes.rate', $recipe) }}" method="POST">
+                                @csrf
+                                
+                                <div class="form-group mb-3">
+                                    <label class="form-label">Votre note:</label>
+                                    <div class="rating-select">
+                                        @for($i = 5; $i >= 1; $i--)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="radio" name="rating" id="rating{{$i}}" value="{{$i}}" {{ $userRating && $userRating->rating == $i ? 'checked' : '' }} required>
+                                                <label class="form-check-label" for="rating{{$i}}">
+                                                    {{$i}} <i class="bi bi-star-fill text-warning"></i>
+                                                </label>
+                                            </div>
+                                        @endfor
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group mb-3">
+                                    <label for="comment" class="form-label">Commentaire (optionnel):</label>
+                                    <textarea class="form-control" name="comment" id="comment" rows="3">{{ $userRating ? $userRating->comment : '' }}</textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    {{ $userRating ? 'Modifier ma note' : 'Soumettre ma note' }}
+                                </button>
+                            </form>
+                        @else
+                            <div class="alert alert-info mb-0">
+                                Connectez-vous pour noter cette recette.
+                                <a href="{{ route('login') }}" class="alert-link">Se connecter</a>
+                            </div>
+                        @endauth
+                    </div>
+                </div>
+                
+                <!-- Commentaires et notes des utilisateurs -->
+                <h4 class="d-flex align-items-center mb-3">
+                    <i class="bi bi-chat-quote me-2 text-primary"></i>Avis ({{ $recipe->ratings()->count() }})
+                </h4>
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        @if($recipe->ratings->count() > 0)
+                            @foreach($recipe->ratings()->with('user')->latest()->get() as $rating)
+                                <div class="rating-item mb-4 {{ !$loop->last ? 'border-bottom pb-4' : '' }}">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-1">{{ $rating->user->name }}</h6>
+                                            <div class="small text-muted">{{ $rating->created_at->format('d/m/Y') }}</div>
+                                        </div>
+                                        <div class="rating-stars">
+                                            @for($i = 1; $i <= 5; $i++)
+                                                <i class="bi {{ $i <= $rating->rating ? 'bi-star-fill' : 'bi-star' }} text-warning"></i>
+                                            @endfor
+                                        </div>
+                                    </div>
+                                    
+                                    @if($rating->comment)
+                                        <p class="mt-2 mb-0">{{ $rating->comment }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-chat-square-text" style="font-size: 2rem;"></i>
+                                <p class="mt-2">Aucun avis pour le moment. Soyez le premier à noter cette recette !</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -173,6 +282,18 @@ use Illuminate\Support\Facades\Auth;
 .list-group-item {
     padding-top: 0.8rem;
     padding-bottom: 0.8rem;
+}
+
+.rating-select .form-check-inline {
+    margin-right: 1rem;
+}
+
+.rating-stars {
+    letter-spacing: 2px;
+}
+
+.rating-display {
+    font-size: 1.2rem;
 }
 </style>
 @endsection 

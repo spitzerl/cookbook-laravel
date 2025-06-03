@@ -99,6 +99,24 @@
                             </div>
                             <h5 class="card-title mb-3">{{ $recipe->title }}</h5>
                             <p class="card-text text-muted">{{ Str::limit($recipe->description, 100) }}</p>
+                            
+                            <!-- Affichage de la note moyenne -->
+                            <div class="recipe-rating mb-3">
+                                @php
+                                    $avgRating = isset($recipe->ratings_avg_rating) ? $recipe->ratings_avg_rating : $recipe->averageRating();
+                                @endphp
+                                
+                                <div class="d-flex align-items-center">
+                                    <div class="rating-stars me-2">
+                                        @for($i = 1; $i <= 5; $i++)
+                                            <i class="bi {{ $i <= round($avgRating) ? 'bi-star-fill' : 'bi-star' }} text-warning"></i>
+                                        @endfor
+                                    </div>
+                                    <span class="small text-muted">
+                                        {{ number_format($avgRating, 1) }} ({{ $recipe->ratings()->count() }})
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                         <div class="card-footer bg-white border-top-0 pt-0">
                             <div class="d-flex gap-2">
@@ -191,6 +209,11 @@
 
 .btn-primary {
     color: #333333;  /* Couleur plus foncée pour un meilleur contraste */
+}
+
+.rating-stars {
+    font-size: 0.8rem;
+    letter-spacing: 1px;
 }
 </style>
 @endsection 

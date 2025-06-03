@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\UserRecipesController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\RecipeLikeController;
+use App\Http\Controllers\RatingController;
 
 // Routes d'authentification
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -31,6 +32,9 @@ Route::get('/recipes/{recipe}/edit', [RecipeController::class, 'edit'])->middlew
 Route::put('/recipes/{recipe}', [RecipeController::class, 'update'])->middleware('auth')->name('recipes.update');
 Route::delete('/recipes/{recipe}', [RecipeController::class, 'destroy'])->middleware('auth')->name('recipes.destroy');
 Route::post('/recipes/{recipe}/like', [RecipeLikeController::class, 'toggle'])->middleware('auth')->name('recipes.like');
+
+// Route pour noter une recette
+Route::post('/recipes/{recipe}/rate', [RatingController::class, 'store'])->middleware('auth')->name('recipes.rate');
 
 // Ressources restantes
 Route::resource('categories', CategoryController::class);
